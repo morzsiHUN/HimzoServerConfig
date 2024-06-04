@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  nginxManager:
+    container_name: nginx_manager-app
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - jswiki_net
+      - wekan_net
+
+networks:
+  jswiki_net:
+    external: true
+  wekan_net:
+    external: true

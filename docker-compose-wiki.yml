@@ -1,0 +1,52 @@
+version: "3"
+services:
+
+  db:
+    container_name: jswiki-db
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: wiki
+      POSTGRES_PASSWORD: wikijsrocks
+      POSTGRES_USER: wikijs
+    logging:
+      driver: "none"
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - wiki
+
+  wiki:
+    container_name: jswiki-app
+    image: ghcr.io/requarks/wiki:2
+    depends_on:
+      - db
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: wikijs
+      DB_PASS: wikijsrocks
+      DB_NAME: wiki
+    restart: unless-stopped
+    networks:
+      - wiki
+    volumes:
+      - jswiki-db-dump:/wiki/data/export
+    # Don't need this since I'll be using a proxy
+    # IMPORTANT: Use a dedicated domain for it, and not a sub directory!
+    # It'll fetch the html fine but the rest will request to the root domain instead of the
+    # sub directory.
+    # ports:
+    #   - "80:3000"
+    #   - "443:3443"
+
+volumes:
+  db-data:
+    name: jswiki_db
+  jswiki-db-dump:
+    name: jswiki_db_dump
+
+networks:
+  wiki:
+    name: jswiki_net
